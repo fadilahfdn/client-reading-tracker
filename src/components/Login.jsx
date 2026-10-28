@@ -1,4 +1,5 @@
 // src/components/Login.jsx
+import { useNavigate, Link } from 'react-router-dom';
 import { useState } from "react";
 import axios from 'axios';
 
@@ -63,7 +64,7 @@ function Login() {
         </div>
         <button type="submit">Login</button>
       </form>
-      <p>Belum punya akun? Daftar di sini.</p>
+      <p>Belum punya akun? <Link to="/register">Daftar di sini.</Link></p>
     </div>
   );
 }
