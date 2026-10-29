@@ -8,6 +8,8 @@ function Login() {
   const [password, setPassword] = useState("");
   const [pesanError, setPesanError] = useState('');
 
+  const navigate = useNavigate();
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setPesanError('');
@@ -25,8 +27,7 @@ function Login() {
       // Simpan token ke dalam local storage browser
       localStorage.setItem('token', tokenJWT);
 
-      console.log("Login Berhasil! Token diamankan di Local Storage.");
-      alert("Login Sukses!");
+      navigate('/dashboard');
 
     } catch (error) {
       // Menangkap balasan error dari Backend
