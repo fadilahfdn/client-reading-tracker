@@ -17,8 +17,6 @@ function Dashboard() {
   useEffect(() => {
     // Mengambil token dari Local Storage
     const token = localStorage.getItem('token');
-
-    // Jika tidak ada token, tendang langsung ke /login
     if (!token) {
       navigate('/login');
       return;
@@ -83,7 +81,6 @@ function Dashboard() {
       });
       
       setBukuList([...bukuList, response.data]);
-      
       setHasilPencarian([]);
       setQueryPencarian('');
       alert("Buku berhasil ditambahkan ke rak Anda!");
@@ -91,6 +88,26 @@ function Dashboard() {
     } catch (error) {
       console.error("Gagal menambah ke database:", error);
       alert("Gagal menambahkan buku ke koleksi Anda.");
+    }
+  };
+
+  const handleHapusBuku = async (idBuku) => {
+    const konfirmasi = window.confirm("Apakah Anda yakin ingin menghapus buku ini dari rak?");
+    if (!konfirmasi) return;
+
+    const token = localStorage.getItem('token');
+    try {
+      // Tembak endpoint DELETE ke backend berdasarkan ID buku
+      await axios.delete(`http://localhost:3000/books/${idBuku}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Update State: Buang buku yang ID-nya cocok dengan yang baru saja dihapus
+      setBukuList(bukuList.filter((buku) => buku.id !== idBuku));
+      
+    } catch (error) {
+      console.error("Gagal menghapus buku:", error);
+      alert("Terjadi kesalahan saat menghapus buku.");
     }
   };
 
@@ -149,9 +166,14 @@ function Dashboard() {
       ) : (
         <ul>
           {bukuList.map((buku) => (
-            <li key={buku.id}>
-              <strong>{buku.title}</strong> - {buku.author} ({buku.status})
-            </li>
+           <li key={buku.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <span>
+                <strong>{buku.title}</strong> - {buku.author} ({buku.status})
+              </span>
+              <button onClick={() => handleHapusBuku(buku.id)} style={{ color: 'red', marginLeft: '10px' }}>
+                Hapus
+              </button>
+           </li>
           ))}
         </ul>
       )}
