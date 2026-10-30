@@ -1,21 +1,84 @@
 /* src/components/Dashboard.css */
 
+/* --- DEKLARASI VARIABEL TEMA (LIGHT & DARK) --- */
+:root {
+  --bg-body: #f1f5f9;
+  --bg-card: #ffffff;
+  --bg-section: #f8fafc;
+  --text-main: #334155;
+  --text-heading: #0f172a;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --input-bg: #ffffff;
+  --input-border: #cbd5e1;
+  --shadow-color: rgba(0, 0, 0, 0.05);
+  --glass-bg: rgba(255, 255, 255, 0.85); /* Efek Kaca Light */
+}
+
+[data-theme="dark"] {
+  --bg-body: #0f172a;
+  --bg-card: #1e293b;
+  --bg-section: #0b1120;
+  --text-main: #cbd5e1;
+  --text-heading: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+  --input-bg: #1e293b;
+  --input-border: #475569;
+  --shadow-color: rgba(0, 0, 0, 0.4);
+  --glass-bg: rgba(30, 41, 59, 0.85); /* Efek Kaca Dark */
+}
+
+/* Memaksa background seluruh halaman (di luar React root) mengikuti tema */
+body {
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  margin: 0;
+}
+
 .dashboard-container {
   max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #333;
+  color: var(--text-main);
 }
 
+/* --- HEADER DENGAN EFEK GLASSMORPHISM --- */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #eee;
+  padding: 15px 20px;
+  border-radius: 12px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);         
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 10px var(--shadow-color);
+  position: sticky;
+  top: 10px;                           
+  z-index: 100;
 }
+
+.header h2 { margin: 0; color: var(--text-heading); }
+
+.header-actions { display: flex; gap: 10px; }
+
+/* TOMBOL TOGGLE THEME */
+.btn-theme {
+  background: var(--bg-section);
+  color: var(--text-heading);
+  border: 1px solid var(--border-color);
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.btn-theme:hover { background: var(--border-color); }
 
 .btn-logout {
   background-color: #ef4444;
@@ -32,12 +95,14 @@
 
 /* --- SEKSI PENCARIAN --- */
 .search-section {
-  background: #f8fafc;
+  background: var(--bg-section);
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px var(--shadow-color);
   margin-bottom: 40px;
+  border: 1px solid var(--border-color);
 }
+.search-section h3 { color: var(--text-heading); }
 
 .search-form {
   display: flex;
@@ -47,7 +112,9 @@
 .search-input {
   flex: 1;
   padding: 10px 15px;
-  border: 1px solid #cbd5e1;
+  background: var(--input-bg);
+  color: var(--text-main);
+  border: 1px solid var(--input-border);
   border-radius: 6px;
   font-size: 16px;
 }
@@ -76,11 +143,13 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   margin-bottom: 8px;
 }
+.search-result-item strong { color: var(--text-heading); }
+.search-result-item span { color: var(--text-muted); }
 
 .btn-add {
   background-color: #10b981;
@@ -102,11 +171,11 @@
 }
 
 .book-card {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 6px var(--shadow-color);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -117,7 +186,7 @@
 
 .book-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 15px var(--shadow-color);
 }
 
 .book-header {
@@ -130,13 +199,13 @@
 .book-title {
   margin: 0 0 5px 0;
   font-size: 1.1em;
-  color: #1e293b;
+  color: var(--text-heading);
 }
 
 .book-author {
   margin: 0;
   font-size: 0.9em;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .btn-delete {
@@ -154,19 +223,22 @@
   display: inline-block;
   width: fit-content;
   align-self: flex-start;
-  padding: 4px 8px;
+  padding: 4px 10px;
   border-radius: 12px;
   font-size: 0.75em;
   font-weight: bold;
-  margin-bottom: 15px;
+  margin-top: 6px;
+  margin-bottom: 12px;
 }
-.badge.unread { background: #f1f5f9; color: #475569; }
+.badge.unread { background: var(--border-color); color: var(--text-main); }
 .badge.reading { background: #dbeafe; color: #1d4ed8; }
+[data-theme="dark"] .badge.reading { background: rgba(29, 78, 216, 0.3); color: #93c5fd; }
 .badge.completed { background: #dcfce3; color: #15803d; }
+[data-theme="dark"] .badge.completed { background: rgba(21, 128, 61, 0.3); color: #86efac; }
 
 .progress-container {
   width: 100%;
-  background-color: #e2e8f0;
+  background-color: var(--border-color);
   border-radius: 8px;
   height: 10px;
   margin-bottom: 15px;
@@ -185,7 +257,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #f8fafc;
+  background: var(--bg-section);
   padding: 10px;
   border-radius: 8px;
 }
@@ -193,7 +265,9 @@
 .page-input {
   width: 60px;
   padding: 5px;
-  border: 1px solid #cbd5e1;
+  background: var(--input-bg);
+  color: var(--text-main);
+  border: 1px solid var(--input-border);
   border-radius: 4px;
   text-align: center;
 }
@@ -225,7 +299,7 @@
   border-radius: 8px;
   color: white;
   font-weight: 500;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   animation: slideIn 0.3s ease-out;
   display: flex;
   align-items: center;
@@ -241,12 +315,13 @@
   to { transform: translateX(0); opacity: 1; }
 }
 
-/* --- MODAL BOX (PENGGANTI PROMPT) --- */
+/* --- MODAL BOX --- */
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -254,23 +329,27 @@
 }
 
 .modal-box {
-  background: white;
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
   padding: 25px;
   border-radius: 12px;
   width: 90%;
   max-width: 400px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
   animation: popIn 0.3s ease-out;
 }
 
-.modal-box h3 { margin-top: 0; color: #1e293b; }
-.modal-box p { color: #64748b; font-size: 0.95em; line-height: 1.5; }
+.modal-box h3 { margin-top: 0; color: var(--text-heading); }
+.modal-box p { color: var(--text-muted); font-size: 0.95em; line-height: 1.5; }
 
 .modal-input {
   width: 100%;
   padding: 10px;
   margin: 15px 0;
-  border: 1px solid #cbd5e1;
+  background: var(--input-bg);
+  color: var(--text-main);
+  border: 1px solid var(--input-border);
   border-radius: 6px;
   font-size: 16px;
   box-sizing: border-box;
@@ -283,15 +362,15 @@
 }
 
 .btn-cancel {
-  background: #f1f5f9;
-  color: #475569;
-  border: none;
+  background: var(--bg-section);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
   padding: 8px 16px;
   border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
 }
-.btn-cancel:hover { background: #e2e8f0; }
+.btn-cancel:hover { background: var(--border-color); }
 
 .btn-confirm {
   background: #3b82f6;
@@ -318,11 +397,11 @@
 
 /* --- SKELETON LOADING --- */
 .skeleton-card {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 6px var(--shadow-color);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -330,7 +409,7 @@
 }
 
 .skeleton-box {
-  background: #e2e8f0;
+  background: var(--border-color);
   border-radius: 4px;
   position: relative;
   overflow: hidden;
@@ -345,11 +424,21 @@
   background-image: linear-gradient(
     90deg,
     rgba(255, 255, 255, 0) 0,
-    rgba(255, 255, 255, 0.5) 20%,
-    rgba(255, 255, 255, 0.5) 50%,
+    rgba(255, 255, 255, 0.2) 20%,
+    rgba(255, 255, 255, 0.2) 50%,
     rgba(255, 255, 255, 0) 100%
   );
   animation: shimmer 1.5s infinite;
+}
+
+[data-theme="dark"] .skeleton-box::after {
+  background-image: linear-gradient(
+    90deg, 
+    rgba(255, 255, 255, 0) 0, 
+    rgba(255, 255, 255, 0.05) 20%, 
+    rgba(255, 255, 255, 0.05) 50%, 
+    rgba(255, 255, 255, 0) 100%
+  );
 }
 
 @keyframes shimmer {
@@ -357,22 +446,22 @@
 }
 
 
-/* --- TAHAP 3: TAB NAVIGASI FILTER --- */
+/* --- TAB NAVIGASI FILTER --- */
 .filter-container {
   display: flex;
   gap: 10px;
   margin-top: 15px;
   margin-bottom: 20px;
-  overflow-x: auto; /* Agar bisa digeser di layar HP */
+  overflow-x: auto;
   padding-bottom: 5px;
 }
 
 .tab-btn {
-  background: white;
-  border: 1px solid #e2e8f0;
-  color: #64748b;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
   padding: 8px 16px;
-  border-radius: 20px; /* Bentuk kapsul melingkar */
+  border-radius: 20px; 
   cursor: pointer;
   font-weight: 600;
   font-size: 0.9em;
@@ -381,11 +470,10 @@
 }
 
 .tab-btn:hover {
-  background: #f8fafc;
-  color: #1e293b;
+  background: var(--bg-section);
+  color: var(--text-heading);
 }
 
-/* Gaya khusus saat tab sedang aktif/dipilih */
 .tab-btn.active {
   background: #3b82f6;
   color: white;
@@ -407,15 +495,15 @@
   height: 95px;
   object-fit: cover;
   border-radius: 6px;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 3px 6px var(--shadow-color);
   flex-shrink: 0;
 }
 
 .book-cover-placeholder {
   width: 65px;
   height: 95px;
-  background-color: #f1f5f9;
-  border: 1px dashed #cbd5e1;
+  background-color: var(--bg-section);
+  border: 1px dashed var(--border-color);
   border-radius: 6px;
   display: flex;
   align-items: center;

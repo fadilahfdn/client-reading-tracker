@@ -7,7 +7,7 @@ import './Dashboard.css';
 function Dashboard() {
   const [bukuList, setBukuList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [pesanError, setPesanError] = useState('');
+  // const [pesanError, setPesanError] = useState('');
 
   const [queryPencarian, setQueryPencarian] = useState('');
   const [hasilPencarian, setHasilPencarian] = useState([]);
@@ -15,8 +15,11 @@ function Dashboard() {
   
   const [toast, setToast] = useState(null);
   const [modalConfig, setModalConfig] = useState({ isOpen: false, bukuPilihan: null, inputHal: 300 });
-
   const [filterStatus, setFilterStatus] = useState('all'); // Pilihan: 'all', 'unread', 'reading', 'completed'
+
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem('theme') === 'dark';
+  });
 
   const navigate = useNavigate();
 
@@ -24,6 +27,16 @@ function Dashboard() {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
 
   useEffect(() => {
     // Mengambil token dari Local Storage
@@ -268,11 +281,20 @@ function Dashboard() {
 
       <div className="header">
         <h2>My Reading Tracker</h2>
-        <button className="btn-logout" onClick={handleLogout}>Logout</button>
+        <div className="header-actions">
+          <button 
+            className="btn-theme" 
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            title="Ganti Mode Tampilan"
+          >
+            {isDarkMode ? '☀️ Terang' : '🌙 Gelap'}
+          </button>
+          <button className="btn-logout" onClick={handleLogout}>Logout</button>
+        </div>
       </div>
 
       <div className="search-section">
-        <h3 style={{ marginTop: 0 }}>Cari Buku Baru</h3>
+        <h3 style={{ marginTop: 0 }}>Cari Buku</h3>
         <form className="search-form" onSubmit={handleCariBuku}>
           <input 
             type="text" 
@@ -292,13 +314,13 @@ function Dashboard() {
               <li key={buku.externalId} className="search-result-item">
                 <span style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                   {buku.coverUrl ? (
-                    <img src={buku.coverUrl} alt="cover" style={{ width: '40px', height: '60px', objectFit: 'cover', borderRadius: '4px' }} />
+                    <img src={buku.coverUrl} alt="cover" className="book-cover-img" style={{ width: '40px', height: '60px' }} />
                   ) : (
-                    <div style={{ width: '40px', height: '60px', background: '#e2e8f0', borderRadius: '4px' }}></div>
+                    <div className="book-cover-placeholder" style={{ width: '40px', height: '60px', fontSize: '1em' }}>📖</div>
                   )}
                   <span>
                     <strong style={{ display: 'block', fontSize: '1.1em' }}>{buku.title}</strong>
-                    <span style={{ color: '#64748b' }}>{buku.author} • {buku.totalPages || '?'} Halaman</span>
+                    <span style={{ color: 'var(--text-muted)' }}>{buku.author} • {buku.totalPages || '?'} Halaman</span>
                   </span>
                 </span>
                 <button className="btn-add" onClick={() => handleKlikTambah(buku)}>+ Tambah</button>
@@ -308,45 +330,30 @@ function Dashboard() {
         )}
       </div>
 
-      {/* --- Area koleksi buku user --- */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '30px' }}>
-        <h3 style={{ margin: 0 }}>Koleksi Buku Saya</h3>
-        {/* Tampilan jumlah dinamis */}
-        <span style={{ color: '#64748b', fontSize: '0.9em', fontWeight: 'bold' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '30px', marginBottom: '15px' }}>
+        <h3 style={{ margin: 0, color: 'var(--text-heading)' }}>Koleksi Buku Saya</h3>
+        <span style={{ color: 'var(--text-muted)', fontSize: '0.9em', fontWeight: 'bold' }}>
           Total: {bukuTampil.length} Buku
         </span>
       </div>
 
-      {/* --- UI FILTER TABS --- */}
       <div className="filter-container">
-        <button 
-          className={`tab-btn ${filterStatus === 'all' ? 'active' : ''}`} 
-          onClick={() => setFilterStatus('all')}
-        >
+        <button className={`tab-btn ${filterStatus === 'all' ? 'active' : ''}`} onClick={() => setFilterStatus('all')}>
           Semua
         </button>
-        <button 
-          className={`tab-btn ${filterStatus === 'unread' ? 'active' : ''}`} 
-          onClick={() => setFilterStatus('unread')}
-        >
+        <button className={`tab-btn ${filterStatus === 'unread' ? 'active' : ''}`} onClick={() => setFilterStatus('unread')}>
           Belum Dibaca
         </button>
-        <button 
-          className={`tab-btn ${filterStatus === 'reading' ? 'active' : ''}`} 
-          onClick={() => setFilterStatus('reading')}
-        >
+        <button className={`tab-btn ${filterStatus === 'reading' ? 'active' : ''}`} onClick={() => setFilterStatus('reading')}>
           Sedang Dibaca
         </button>
-        <button 
-          className={`tab-btn ${filterStatus === 'completed' ? 'active' : ''}`} 
-          onClick={() => setFilterStatus('completed')}
-        >
+        <button className={`tab-btn ${filterStatus === 'completed' ? 'active' : ''}`} onClick={() => setFilterStatus('completed')}>
           Selesai
         </button>
       </div>
 
       {bukuTampil.length === 0 ? (
-        <p style={{ textAlign: 'center', color: '#64748b', padding: '40px', background: '#f8fafc', borderRadius: '12px' }}>
+        <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '40px', background: 'var(--bg-section)', borderRadius: '12px' }}>
           {filterStatus === 'all' 
             ? "Belum ada buku di rak Anda. Mulai cari dan tambahkan buku pertama Anda!"
             : `Tidak ada buku dengan status "${terjemahkanStatus(filterStatus)}" saat ini.`}
@@ -358,16 +365,15 @@ function Dashboard() {
             return (
               <li key={buku.id} className="book-card" style={{ animationDelay: `${index * 0.05}s` }}>
                 <div>
-                  {/* STRUKTUR BARU BERSAMA GAMBAR COVER */}
                   <div className="book-card-body">
                     {buku.coverUrl ? (
                       <img src={buku.coverUrl} alt={buku.title} className="book-cover-img" />
                     ) : (
                       <div className="book-cover-placeholder">📖</div>
                     )}
-
+                    
                     <div className="book-info">
-                      <div className="book-header">
+                      <div className="book-header" style={{ marginBottom: 0 }}>
                         <div>
                           <h4 className="book-title">{buku.title}</h4>
                           <p className="book-author">{buku.author}</p>
@@ -383,7 +389,7 @@ function Dashboard() {
                   <div className="progress-container">
                     <div className={`progress-fill ${buku.status === 'completed' ? 'done' : ''}`} style={{ width: `${persentase}%` }}></div>
                   </div>
-                  <div style={{ textAlign: 'right', fontSize: '0.8em', color: '#64748b', marginBottom: '15px' }}>
+                  <div style={{ textAlign: 'right', fontSize: '0.8em', color: 'var(--text-muted)', marginBottom: '15px' }}>
                     {persentase}% Selesai
                   </div>
                 </div>
@@ -398,7 +404,7 @@ function Dashboard() {
                       value={buku.currentPage || 0}
                       onChange={(e) => handleUpdateProgres(buku, e.target.value)}
                     />
-                    <span style={{ fontSize: '0.9em', color: '#64748b' }}>/ {buku.endPage || '?'} hal</span>
+                    <span style={{ fontSize: '0.9em', color: 'var(--text-muted)' }}>/ {buku.endPage || '?'} hal</span>
                   </div>
 
                   {buku.status !== 'completed' && buku.endPage > 0 && (
