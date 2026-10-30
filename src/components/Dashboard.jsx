@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import './Dashboard.css';
 
 function Dashboard() {
   const [bukuList, setBukuList] = useState([]);
@@ -12,7 +13,17 @@ function Dashboard() {
   const [hasilPencarian, setHasilPencarian] = useState([]);
   const [loadingCari, setLoadingCari] = useState(false);
   
+  const [toast, setToast] = useState(null);
+  const [modalConfig, setModalConfig] = useState({ isOpen: false, bukuPilihan: null, inputHal: 300 });
+
+  const [filterStatus, setFilterStatus] = useState('all'); // Pilihan: 'all', 'unread', 'reading', 'completed'
+
   const navigate = useNavigate();
+
+  const showToast = (message, type = 'info') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   useEffect(() => {
     // Mengambil token dari Local Storage
@@ -63,54 +74,58 @@ function Dashboard() {
       
       setHasilPencarian(response.data.results || []);
     } catch (error) {
-      console.error("Gagal mencari buku:", error);
-      alert("Terjadi kesalahan saat mencari buku. Pastikan rute /search di backend sudah ada.");
+      showToast("Terjadi kesalahan saat mencari buku.", "error");
     } finally {
       setLoadingCari(false);
     }
   };
 
   // fungsi menambah buku ke database
-  const handleTambahBuku = async (bukuPilihan) => {
-    const token = localStorage.getItem('token');
-    const totalHal = bukuPilihan.totalPages || 0;
-
-   // Jika backend mendapati halaman = 0 dari server publik
+  const handleKlikTambah = (bukuPilihan) => {
+    let totalHal = bukuPilihan.totalPages || 0;
+    
     if (totalHal === 0) {
-      const inputManual = window.prompt(
-        `Total halaman untuk "${bukuPilihan.title}" tidak diketahui. Masukkan total halamannya secara manual:`, 
-        "300"
-      );
-      if (inputManual === null) return; 
-      totalHal = parseInt(inputManual) || 1; 
+      setModalConfig({ isOpen: true, bukuPilihan: bukuPilihan, inputHal: 300 });
+    } else {
+      // Langsung eksekusi jika halaman sudah ada
+      eksekusiSimpanBuku(bukuPilihan, totalHal);
     }
+  };
 
+  // Fungsi riil penembak Axios
+  const eksekusiSimpanBuku = async (bukuPilihan, totalHal) => {
+    const token = localStorage.getItem('token');
     const dataBukuBaru = {
       title: bukuPilihan.title,
-      author: bukuPilihan.author,
+      author: bukuPilihan.author, 
       startPage: 0,
-      endPage: totalHal 
+      endPage: totalHal,
+      coverUrl: bukuPilihan.coverUrl || null
     };
 
     try {
       const response = await axios.post('http://localhost:3000/books', dataBukuBaru, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
-      setBukuList([...bukuList, response.data]);
+      setBukuList([...bukuList, response.data]); 
       setHasilPencarian([]);
       setQueryPencarian('');
+      setModalConfig({ isOpen: false, bukuPilihan: null, inputHal: 300 }); // Tutup modal
+      
+      // Jika tab saat ini bukan "Semua" atau "Belum Dibaca", pindahkan otomatis
+      if (filterStatus !== 'all' && filterStatus !== 'unread') {
+        setFilterStatus('unread');
+      }
+
+      showToast(`Buku "${bukuPilihan.title}" berhasil ditambahkan!`, "success");
     } catch (error) {
-      console.error("Gagal menambah buku:", error);
-      const errorData = error.response?.data;
-      const pesanTolak = errorData?.message || errorData?.error || "Gagal menambahkan buku.";
-      alert(pesanTolak);
+      showToast(error.response?.data?.message || "Gagal menambahkan buku.", "error");
     }
   };
 
   // fungsi untuk menghapus buku
   const handleHapusBuku = async (idBuku) => {
-    const konfirmasi = window.confirm("Apakah Anda yakin ingin menghapus buku ini dari rak?");
+    const konfirmasi = window.confirm("Yakin ingin menghapus buku ini?");
     if (!konfirmasi) return;
 
     const token = localStorage.getItem('token');
@@ -122,10 +137,9 @@ function Dashboard() {
       
       // Update State: Buang buku yang ID-nya cocok dengan yang baru saja dihapus
       setBukuList(bukuList.filter((buku) => buku.id !== idBuku));
-      
+      showToast("Buku dihapus dari koleksi.", "success");
     } catch (error) {
       console.error("Gagal menghapus buku:", error);
-      alert("Terjadi kesalahan saat menghapus buku.");
     }
   };
 
@@ -155,17 +169,11 @@ function Dashboard() {
       ));
 
       if (updatedBook.status === 'completed' && buku.status !== 'completed') {
-         alert(response.data.message);
+         showToast(response.data.message, "success");
       }
 
     } catch (error) {
-      console.error("Gagal mengubah progres:", error);
-      // Tangkap pesan error spesifik dari backend (misal: "Halaman tidak boleh melebihi total...")
-      if (error.response && error.response.data && error.response.data.message) {
-        alert(error.response.data.message);
-      } else {
-        alert("Terjadi kesalahan saat memperbarui progres buku.");
-      }
+      showToast(error.response?.data?.message || "Gagal memperbarui progres.", "error");
     }
   };
 
@@ -182,48 +190,118 @@ function Dashboard() {
     return statusSistem; // Fallback
   };
 
-  if (loading) return <p>Memuat data buku...</p>;
+  // Mengambil bukuList, lalu menyaringnya berdasarkan Tab yang sedang diklik
+  const bukuTampil = bukuList.filter((buku) => {
+    if (filterStatus === 'all') return true;
+    return buku.status === filterStatus;
+  });
 
+  // === UI SAAT LOADING (SKELETON ANIMATION) ===
+  if (loading) {
+    return (
+      <div className="dashboard-container">
+        <div className="header">
+          <h2>My Reading Tracker</h2>
+          <div className="skeleton-box" style={{ width: '80px', height: '35px', borderRadius: '6px' }}></div>
+        </div>
+        
+        {/* Skeleton Kotak Pencarian */}
+        <div className="skeleton-box" style={{ width: '100%', height: '120px', borderRadius: '12px', marginBottom: '40px' }}></div>
+        
+        <h3>Koleksi Buku Saya</h3>
+        <ul className="book-grid">
+          {[1, 2, 3, 4, 5, 6].map((n) => (
+            <li key={n} className="skeleton-card">
+              <div>
+                <div className="skeleton-box" style={{ width: '70%', height: '24px', marginBottom: '8px' }}></div>
+                <div className="skeleton-box" style={{ width: '50%', height: '16px', marginBottom: '20px' }}></div>
+                <div className="skeleton-box" style={{ width: '90px', height: '22px', borderRadius: '12px', marginBottom: '15px' }}></div>
+                <div className="skeleton-box" style={{ width: '100%', height: '10px', borderRadius: '8px', marginBottom: '15px' }}></div>
+              </div>
+              <div className="skeleton-box" style={{ width: '100%', height: '40px', borderRadius: '8px' }}></div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
+  // === UI UTAMA (SETELAH LOADING SELESAI) ===
   return (
     <div className="dashboard-container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2>Dashboard Reading Tracker</h2>
-        <button onClick={handleLogout}>Logout</button>
+      
+      {toast && (
+        <div className="toast-container">
+          <div className={`toast ${toast.type}`}>
+            {toast.type === 'success' ? '✅' : toast.type === 'error' ? '❌' : 'ℹ️'} 
+            {toast.message}
+          </div>
+        </div>
+      )}
+
+      {modalConfig.isOpen && (
+        <div className="modal-overlay">
+          <div className="modal-box">
+            <h3>Masukkan Halaman Manual</h3>
+            <p>
+              Data total halaman untuk buku <strong>"{modalConfig.bukuPilihan?.title}"</strong> tidak ditemukan di server publik. 
+              Silakan masukkan perkiraan halamannya:
+            </p>
+            <input 
+              type="number" 
+              className="modal-input"
+              value={modalConfig.inputHal}
+              min="1"
+              onChange={(e) => setModalConfig({ ...modalConfig, inputHal: parseInt(e.target.value) || 0 })}
+            />
+            <div className="modal-actions">
+              <button className="btn-cancel" onClick={() => setModalConfig({ isOpen: false, bukuPilihan: null, inputHal: 300 })}>
+                Batal
+              </button>
+              <button className="btn-confirm" onClick={() => eksekusiSimpanBuku(modalConfig.bukuPilihan, modalConfig.inputHal)}>
+                Simpan Buku
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="header">
+        <h2>My Reading Tracker</h2>
+        <button className="btn-logout" onClick={handleLogout}>Logout</button>
       </div>
 
-      {pesanError && <p style={{ color: 'red' }}>{pesanError}</p>}
-
-      {/* --- Area pencarian buku --- */}
-      <div style={{ border: '1px solid #ccc', padding: '15px', marginBottom: '20px' }}>
-        <h3>Cari Buku Baru</h3>
-        <form onSubmit={handleCariBuku} style={{ display: 'flex', gap: '10px' }}>
+      <div className="search-section">
+        <h3 style={{ marginTop: 0 }}>Cari Buku Baru</h3>
+        <form className="search-form" onSubmit={handleCariBuku}>
           <input 
             type="text" 
-            placeholder="Ketik judul buku..." 
+            className="search-input"
+            placeholder="Ketik judul buku (contoh: Atomic Habits)..." 
             value={queryPencarian}
             onChange={(e) => setQueryPencarian(e.target.value)}
-            style={{ flex: 1 }}
           />
-          <button type="submit" disabled={loadingCari}>
+          <button type="submit" className="btn-search" disabled={loadingCari}>
             {loadingCari ? 'Mencari...' : 'Cari'}
           </button>
         </form>
 
-        {/* Tampilkan hasil dari Open Library jika ada */}
         {hasilPencarian.length > 0 && (
-          <ul style={{ background: '#f9f9f9', padding: '10px', marginTop: '15px' }}>
+          <ul className="search-results">
             {hasilPencarian.map((buku) => (
-              <li key={buku.externalId} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  {buku.coverUrl && (
-                    <img src={buku.coverUrl} alt="cover" style={{ width: '30px', height: '45px', objectFit: 'cover' }} />
+              <li key={buku.externalId} className="search-result-item">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                  {buku.coverUrl ? (
+                    <img src={buku.coverUrl} alt="cover" style={{ width: '40px', height: '60px', objectFit: 'cover', borderRadius: '4px' }} />
+                  ) : (
+                    <div style={{ width: '40px', height: '60px', background: '#e2e8f0', borderRadius: '4px' }}></div>
                   )}
                   <span>
-                    <strong>{buku.title}</strong> - {buku.author}
-                    <small> ({buku.totalPages || '?'} hal)</small>
+                    <strong style={{ display: 'block', fontSize: '1.1em' }}>{buku.title}</strong>
+                    <span style={{ color: '#64748b' }}>{buku.author} • {buku.totalPages || '?'} Halaman</span>
                   </span>
                 </span>
-                <button onClick={() => handleTambahBuku(buku)}>Tambah</button>
+                <button className="btn-add" onClick={() => handleKlikTambah(buku)}>+ Tambah</button>
               </li>
             ))}
           </ul>
@@ -231,55 +309,107 @@ function Dashboard() {
       </div>
 
       {/* --- Area koleksi buku user --- */}
-      <h3>Daftar Bacaan Saya</h3>
-      {bukuList.length === 0 ? (
-        <p>Belum ada buku di dalam koleksi Anda. Silakan cari dan tambah buku di atas!</p>
-      ) : (
-        <ul style={{ padding: 0, listStyle: 'none' }}>
-          {bukuList.map((buku) => (
-            <li key={buku.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '15px', padding: '15px', border: '1px solid #eee', borderRadius: '8px' }}>
-              
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <strong>{buku.title}</strong> <br/> 
-                  <small>Penulis: {buku.author}</small> <br/>
-                  <span style={{ fontSize: '0.9em', color: buku.status === 'completed' ? 'green' : 'black' }}>
-                    Status: <strong>{terjemahkanStatus(buku.status)}</strong>
-                  </span>
-                </div>
-                <button onClick={() => handleHapusBuku(buku.id)} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
-                  Hapus
-                </button>
-              </div>
-              
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', backgroundColor: '#f9f9f9', padding: '10px', borderRadius: '5px' }}>
-                <label style={{ fontSize: '0.9em' }}>Progres Halaman:</label>
-                
-                {/* Input untuk mengupdate currentPage */}
-                <input 
-                  type="number" 
-                  min="0"
-                  max={buku.endPage || 9999}
-                  value={buku.currentPage || 0}
-                  onChange={(e) => handleUpdateProgres(buku, e.target.value)}
-                  style={{ width: '80px', padding: '5px' }}
-                />
-                
-                <span style={{ fontSize: '0.9em', marginRight: 'auto' }}>
-                  / {buku.endPage || '?'} hal
-                </span>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '30px' }}>
+        <h3 style={{ margin: 0 }}>Koleksi Buku Saya</h3>
+        {/* Tampilan jumlah dinamis */}
+        <span style={{ color: '#64748b', fontSize: '0.9em', fontWeight: 'bold' }}>
+          Total: {bukuTampil.length} Buku
+        </span>
+      </div>
 
-                {buku.status !== 'completed' && buku.endPage > 0 && (
-                  <button 
-                    onClick={() => handleUpdateProgres(buku, buku.endPage)}
-                    style={{ backgroundColor: '#4caf50', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer' }}
-                  >
-                    ✔ Tandai Selesai
-                  </button>
-                )}
-              </div>
-            </li>
-          ))}
+      {/* --- UI FILTER TABS --- */}
+      <div className="filter-container">
+        <button 
+          className={`tab-btn ${filterStatus === 'all' ? 'active' : ''}`} 
+          onClick={() => setFilterStatus('all')}
+        >
+          Semua
+        </button>
+        <button 
+          className={`tab-btn ${filterStatus === 'unread' ? 'active' : ''}`} 
+          onClick={() => setFilterStatus('unread')}
+        >
+          Belum Dibaca
+        </button>
+        <button 
+          className={`tab-btn ${filterStatus === 'reading' ? 'active' : ''}`} 
+          onClick={() => setFilterStatus('reading')}
+        >
+          Sedang Dibaca
+        </button>
+        <button 
+          className={`tab-btn ${filterStatus === 'completed' ? 'active' : ''}`} 
+          onClick={() => setFilterStatus('completed')}
+        >
+          Selesai
+        </button>
+      </div>
+
+      {bukuTampil.length === 0 ? (
+        <p style={{ textAlign: 'center', color: '#64748b', padding: '40px', background: '#f8fafc', borderRadius: '12px' }}>
+          {filterStatus === 'all' 
+            ? "Belum ada buku di rak Anda. Mulai cari dan tambahkan buku pertama Anda!"
+            : `Tidak ada buku dengan status "${terjemahkanStatus(filterStatus)}" saat ini.`}
+        </p>
+      ) : (
+        <ul className="book-grid">
+          {bukuTampil.map((buku, index) => {
+            const persentase = buku.endPage > 0 ? Math.round(((buku.currentPage || 0) / buku.endPage) * 100) : 0;
+            return (
+              <li key={buku.id} className="book-card" style={{ animationDelay: `${index * 0.05}s` }}>
+                <div>
+                  {/* STRUKTUR BARU BERSAMA GAMBAR COVER */}
+                  <div className="book-card-body">
+                    {buku.coverUrl ? (
+                      <img src={buku.coverUrl} alt={buku.title} className="book-cover-img" />
+                    ) : (
+                      <div className="book-cover-placeholder">📖</div>
+                    )}
+
+                    <div className="book-info">
+                      <div className="book-header">
+                        <div>
+                          <h4 className="book-title">{buku.title}</h4>
+                          <p className="book-author">{buku.author}</p>
+                        </div>
+                        <button className="btn-delete" title="Hapus Buku" onClick={() => handleHapusBuku(buku.id)}>🗑️</button>
+                      </div>
+                      <span className={`badge ${buku.status}`}>
+                        {terjemahkanStatus(buku.status)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="progress-container">
+                    <div className={`progress-fill ${buku.status === 'completed' ? 'done' : ''}`} style={{ width: `${persentase}%` }}></div>
+                  </div>
+                  <div style={{ textAlign: 'right', fontSize: '0.8em', color: '#64748b', marginBottom: '15px' }}>
+                    {persentase}% Selesai
+                  </div>
+                </div>
+                
+                <div className="book-controls">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input 
+                      type="number" 
+                      className="page-input"
+                      min="0"
+                      max={buku.endPage || 9999}
+                      value={buku.currentPage || 0}
+                      onChange={(e) => handleUpdateProgres(buku, e.target.value)}
+                    />
+                    <span style={{ fontSize: '0.9em', color: '#64748b' }}>/ {buku.endPage || '?'} hal</span>
+                  </div>
+
+                  {buku.status !== 'completed' && buku.endPage > 0 && (
+                    <button className="btn-done" onClick={() => handleUpdateProgres(buku, buku.endPage)}>
+                      ✔ Selesai
+                    </button>
+                  )}
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

@@ -8,8 +8,7 @@ function App() {
   return (
    <BrowserRouter>
       <div>
-        <h1>Aplikasi Reading Tracker</h1>
-        
+        {/* <h1>Aplikasi Reading Tracker</h1> */}
         <Routes>
           <Route path="/" element={<Navigate to="/login" />} />
           <Route path="/login" element={<Login />} />
