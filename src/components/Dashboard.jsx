@@ -53,12 +53,18 @@ function Dashboard() {
 
     setLoadingCari(true);
     setHasilPencarian([]);
+    const token = localStorage.getItem('token');
+
     try {
-      const response = await axios.get(`https://openlibrary.org/search.json?title=${queryPencarian}&limit=5`);
-      setHasilPencarian(response.data.docs); // Open Library menaruh datanya di dalam properti 'docs'
+      // Menembak ke backend
+      const response = await axios.get(`http://localhost:3000/books/search?title=${queryPencarian}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      setHasilPencarian(response.data.results || []);
     } catch (error) {
-      console.error("Gagal mencari dari Open Library:", error);
-      alert("Terjadi kesalahan saat mencari buku ke server luar.");
+      console.error("Gagal mencari buku:", error);
+      alert("Terjadi kesalahan saat mencari buku. Pastikan rute /search di backend sudah ada.");
     } finally {
       setLoadingCari(false);
     }
@@ -67,12 +73,23 @@ function Dashboard() {
   // fungsi menambah buku ke database
   const handleTambahBuku = async (bukuPilihan) => {
     const token = localStorage.getItem('token');
-    
+    const totalHal = bukuPilihan.totalPages || 0;
+
+   // Jika backend mendapati halaman = 0 dari server publik
+    if (totalHal === 0) {
+      const inputManual = window.prompt(
+        `Total halaman untuk "${bukuPilihan.title}" tidak diketahui. Masukkan total halamannya secara manual:`, 
+        "300"
+      );
+      if (inputManual === null) return; 
+      totalHal = parseInt(inputManual) || 1; 
+    }
+
     const dataBukuBaru = {
       title: bukuPilihan.title,
-      author: bukuPilihan.author_name ? bukuPilihan.author_name[0] : 'Penulis Tidak Diketahui', 
-      totalPages: bukuPilihan.number_of_pages_median || 0, 
-      status: 'Belum Dibaca'
+      author: bukuPilihan.author,
+      startPage: 0,
+      endPage: totalHal 
     };
 
     try {
@@ -83,14 +100,15 @@ function Dashboard() {
       setBukuList([...bukuList, response.data]);
       setHasilPencarian([]);
       setQueryPencarian('');
-      alert("Buku berhasil ditambahkan ke rak Anda!");
-      
     } catch (error) {
-      console.error("Gagal menambah ke database:", error);
-      alert("Gagal menambahkan buku ke koleksi Anda.");
+      console.error("Gagal menambah buku:", error);
+      const errorData = error.response?.data;
+      const pesanTolak = errorData?.message || errorData?.error || "Gagal menambahkan buku.";
+      alert(pesanTolak);
     }
   };
 
+  // fungsi untuk menghapus buku
   const handleHapusBuku = async (idBuku) => {
     const konfirmasi = window.confirm("Apakah Anda yakin ingin menghapus buku ini dari rak?");
     if (!konfirmasi) return;
@@ -111,10 +129,57 @@ function Dashboard() {
     }
   };
 
+  // fungsi untuk update status buku
+  const handleUpdateProgres = async (buku, inputHalaman) => {
+    const token = localStorage.getItem('token');
+    let pageNumber = parseInt(inputHalaman) || 0;
+
+    // Cegah pengiriman nilai negatif
+    if (pageNumber < 0) pageNumber = 0;
+    
+    if (buku.endPage > 0 && pageNumber > buku.endPage) {
+      pageNumber = buku.endPage;
+    }
+
+    try {
+      const response = await axios.put(`http://localhost:3000/books/${buku.id}/progress`, 
+        { currentPage: pageNumber }, 
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      // Ambil data buku yang sudah di-update dari respons JSON controller
+      const updatedBook = response.data.book;
+      
+      setBukuList(bukuList.map((item) => 
+        item.id === buku.id ? updatedBook : item
+      ));
+
+      if (updatedBook.status === 'completed' && buku.status !== 'completed') {
+         alert(response.data.message);
+      }
+
+    } catch (error) {
+      console.error("Gagal mengubah progres:", error);
+      // Tangkap pesan error spesifik dari backend (misal: "Halaman tidak boleh melebihi total...")
+      if (error.response && error.response.data && error.response.data.message) {
+        alert(error.response.data.message);
+      } else {
+        alert("Terjadi kesalahan saat memperbarui progres buku.");
+      }
+    }
+  };
+
   // fungsi logout
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/login');
+  };
+
+  const terjemahkanStatus = (statusSistem) => {
+    if (statusSistem === 'unread') return 'Belum Dibaca';
+    if (statusSistem === 'reading') return 'Sedang Dibaca';
+    if (statusSistem === 'completed') return 'Selesai';
+    return statusSistem; // Fallback
   };
 
   if (loading) return <p>Memuat data buku...</p>;
@@ -148,9 +213,15 @@ function Dashboard() {
         {hasilPencarian.length > 0 && (
           <ul style={{ background: '#f9f9f9', padding: '10px', marginTop: '15px' }}>
             {hasilPencarian.map((buku) => (
-              <li key={buku.key} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <span>
-                  <strong>{buku.title}</strong> - {buku.author_name ? buku.author_name[0] : 'Unknown'}
+              <li key={buku.externalId} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  {buku.coverUrl && (
+                    <img src={buku.coverUrl} alt="cover" style={{ width: '30px', height: '45px', objectFit: 'cover' }} />
+                  )}
+                  <span>
+                    <strong>{buku.title}</strong> - {buku.author}
+                    <small> ({buku.totalPages || '?'} hal)</small>
+                  </span>
                 </span>
                 <button onClick={() => handleTambahBuku(buku)}>Tambah</button>
               </li>
@@ -164,16 +235,50 @@ function Dashboard() {
       {bukuList.length === 0 ? (
         <p>Belum ada buku di dalam koleksi Anda. Silakan cari dan tambah buku di atas!</p>
       ) : (
-        <ul>
+        <ul style={{ padding: 0, listStyle: 'none' }}>
           {bukuList.map((buku) => (
-           <li key={buku.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <span>
-                <strong>{buku.title}</strong> - {buku.author} ({buku.status})
-              </span>
-              <button onClick={() => handleHapusBuku(buku.id)} style={{ color: 'red', marginLeft: '10px' }}>
-                Hapus
-              </button>
-           </li>
+            <li key={buku.id} style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '15px', padding: '15px', border: '1px solid #eee', borderRadius: '8px' }}>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <strong>{buku.title}</strong> <br/> 
+                  <small>Penulis: {buku.author}</small> <br/>
+                  <span style={{ fontSize: '0.9em', color: buku.status === 'completed' ? 'green' : 'black' }}>
+                    Status: <strong>{terjemahkanStatus(buku.status)}</strong>
+                  </span>
+                </div>
+                <button onClick={() => handleHapusBuku(buku.id)} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
+                  Hapus
+                </button>
+              </div>
+              
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', backgroundColor: '#f9f9f9', padding: '10px', borderRadius: '5px' }}>
+                <label style={{ fontSize: '0.9em' }}>Progres Halaman:</label>
+                
+                {/* Input untuk mengupdate currentPage */}
+                <input 
+                  type="number" 
+                  min="0"
+                  max={buku.endPage || 9999}
+                  value={buku.currentPage || 0}
+                  onChange={(e) => handleUpdateProgres(buku, e.target.value)}
+                  style={{ width: '80px', padding: '5px' }}
+                />
+                
+                <span style={{ fontSize: '0.9em', marginRight: 'auto' }}>
+                  / {buku.endPage || '?'} hal
+                </span>
+
+                {buku.status !== 'completed' && buku.endPage > 0 && (
+                  <button 
+                    onClick={() => handleUpdateProgres(buku, buku.endPage)}
+                    style={{ backgroundColor: '#4caf50', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer' }}
+                  >
+                    ✔ Tandai Selesai
+                  </button>
+                )}
+              </div>
+            </li>
           ))}
         </ul>
       )}
