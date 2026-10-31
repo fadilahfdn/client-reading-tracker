@@ -1,42 +1,5 @@
 /* src/components/Dashboard.css */
 
-/* --- DEKLARASI VARIABEL TEMA (LIGHT & DARK) --- */
-:root {
-  --bg-body: #f1f5f9;
-  --bg-card: #ffffff;
-  --bg-section: #f8fafc;
-  --text-main: #334155;
-  --text-heading: #0f172a;
-  --text-muted: #64748b;
-  --border-color: #e2e8f0;
-  --input-bg: #ffffff;
-  --input-border: #cbd5e1;
-  --shadow-color: rgba(0, 0, 0, 0.05);
-  --glass-bg: rgba(255, 255, 255, 0.85); /* Efek Kaca Light */
-}
-
-[data-theme="dark"] {
-  --bg-body: #0f172a;
-  --bg-card: #1e293b;
-  --bg-section: #0b1120;
-  --text-main: #cbd5e1;
-  --text-heading: #f8fafc;
-  --text-muted: #94a3b8;
-  --border-color: #334155;
-  --input-bg: #1e293b;
-  --input-border: #475569;
-  --shadow-color: rgba(0, 0, 0, 0.4);
-  --glass-bg: rgba(30, 41, 59, 0.85); /* Efek Kaca Dark */
-}
-
-/* Memaksa background seluruh halaman (di luar React root) mengikuti tema */
-body {
-  background-color: var(--bg-body);
-  color: var(--text-main);
-  transition: background-color 0.3s ease, color 0.3s ease;
-  margin: 0;
-}
-
 .dashboard-container {
   max-width: 1000px;
   margin: 0 auto;
