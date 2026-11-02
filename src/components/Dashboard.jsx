@@ -203,6 +203,11 @@ function Dashboard() {
     return statusSistem; // Fallback
   };
 
+  // Kalkulasi statistik
+  const totalBukuTersimpan = bukuList.length;
+  const totalBukuTamat = bukuList.filter((buku) => buku.status === 'completed').length;
+  const totalHalamanDibaca = bukuList.reduce((akumulator, buku) => akumulator + (buku.currentPage || 0), 0);
+
   // Mengambil bukuList, lalu menyaringnya berdasarkan Tab yang sedang diklik
   const bukuTampil = bukuList.filter((buku) => {
     if (filterStatus === 'all') return true;
@@ -293,6 +298,23 @@ function Dashboard() {
         </div>
       </div>
 
+      {/* === KERANGKA WIDGET STATISTIK === */}
+      <div className="stats-container">
+        <div className="stats-card">
+          <span className="stat-value">{totalBukuTersimpan}</span>
+          <span className="stat-label">Total Buku</span>
+        </div>
+        <div className="stats-card success">
+          <span className="stat-value">{totalBukuTamat}</span>
+          <span className="stat-label">Buku Tamat</span>
+        </div>
+        <div className="stats-card purple">
+          <span className="stat-value">{totalHalamanDibaca}</span>
+          <span className="stat-label">Halaman Dibaca</span>
+        </div>
+      </div>
+
+      {/* === KERANGKA Kolom Pencarian === */}
       <div className="search-section">
         <h3 style={{ marginTop: 0 }}>Cari Buku</h3>
         <form className="search-form" onSubmit={handleCariBuku}>
