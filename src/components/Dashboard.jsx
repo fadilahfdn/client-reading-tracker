@@ -300,15 +300,15 @@ function Dashboard() {
 
       {/* === KERANGKA WIDGET STATISTIK === */}
       <div className="stats-container">
-        <div className="stats-card">
+        <div className="stat-card">
           <span className="stat-value">{totalBukuTersimpan}</span>
           <span className="stat-label">Total Buku</span>
         </div>
-        <div className="stats-card success">
+        <div className="stat-card success">
           <span className="stat-value">{totalBukuTamat}</span>
           <span className="stat-label">Buku Tamat</span>
         </div>
-        <div className="stats-card purple">
+        <div className="stat-card purple">
           <span className="stat-value">{totalHalamanDibaca}</span>
           <span className="stat-label">Halaman Dibaca</span>
         </div>
