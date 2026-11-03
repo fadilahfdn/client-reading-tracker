@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { Trash2, Sun, Moon, LogOut, CheckCircle, BookOpen } from 'lucide-react';
 import './Dashboard.css';
 
 function Dashboard() {
@@ -291,8 +292,10 @@ function Dashboard() {
             className="btn-theme" 
             onClick={() => setIsDarkMode(!isDarkMode)}
             title="Ganti Mode Tampilan"
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
           >
-            {isDarkMode ? '☀️ Terang' : '🌙 Gelap'}
+            {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
+            {isDarkMode ? 'Terang' : 'Gelap'}
           </button>
           <button className="btn-logout" onClick={handleLogout}>Logout</button>
         </div>
@@ -321,7 +324,7 @@ function Dashboard() {
           <input 
             type="text" 
             className="search-input"
-            placeholder="Ketik judul buku (contoh: Atomic Habits)..." 
+            placeholder="Ketik judul buku (contoh: Atomic Habits)" 
             value={queryPencarian}
             onChange={(e) => setQueryPencarian(e.target.value)}
           />
@@ -338,7 +341,9 @@ function Dashboard() {
                   {buku.coverUrl ? (
                     <img src={buku.coverUrl} alt="cover" className="book-cover-img" style={{ width: '40px', height: '60px' }} />
                   ) : (
-                    <div className="book-cover-placeholder" style={{ width: '40px', height: '60px', fontSize: '1em' }}>📖</div>
+                    <div className="book-cover-placeholder" style={{ width: '40px', height: '60px', fontSize: '1em' }}>
+                    <BookOpen size={24} color="var(--text-muted)" />
+                    </div>
                   )}
                   <span>
                     <strong style={{ display: 'block', fontSize: '1.1em' }}>{buku.title}</strong>
@@ -400,7 +405,9 @@ function Dashboard() {
                           <h4 className="book-title">{buku.title}</h4>
                           <p className="book-author">{buku.author}</p>
                         </div>
-                        <button className="btn-delete" title="Hapus Buku" onClick={() => handleHapusBuku(buku.id)}>🗑️</button>
+                        <button className="btn-delete" title="Hapus Buku" onClick={() => handleHapusBuku(buku.id)}>
+                        <Trash2 size={18} />
+                        </button>
                       </div>
                       <span className={`badge ${buku.status}`}>
                         {terjemahkanStatus(buku.status)}
@@ -431,7 +438,7 @@ function Dashboard() {
 
                   {buku.status !== 'completed' && buku.endPage > 0 && (
                     <button className="btn-done" onClick={() => handleUpdateProgres(buku, buku.endPage)}>
-                      ✔ Selesai
+                      <CheckCircle size={16} /> Selesai
                     </button>
                   )}
                 </div>

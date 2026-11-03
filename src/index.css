@@ -39,7 +39,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, .stat-value {
+h1, h2, h3 {
   font-family: 'Playfair Display', serif;
   letter-spacing: -0.5px;
 }
