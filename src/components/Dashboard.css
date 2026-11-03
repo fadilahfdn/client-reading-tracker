@@ -555,3 +555,53 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
+/* -- Responsivitas Mobile -- */
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .stats-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .search-form {
+    flex-direction: column;
+  }
+
+  .btn-search {
+    width: 100%;
+  }
+
+  .filter-container {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .book-card-body {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .book-header {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .book-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .page-input {
+    width: 100%;
+  }
+}
