@@ -2,17 +2,19 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, Sun, Moon, LogOut, CheckCircle, BookOpen, Star } from 'lucide-react';
+import { Trash2, Sun, Moon, LogOut, CheckCircle, BookOpen, Star, AlertTriangle } from 'lucide-react';
 import './Dashboard.css';
 
 function Dashboard() {
   const [bukuList, setBukuList] = useState([]);
   const [loading, setLoading] = useState(true);
-  // const [pesanError, setPesanError] = useState('');
 
   const [queryPencarian, setQueryPencarian] = useState('');
   const [hasilPencarian, setHasilPencarian] = useState([]);
   const [loadingCari, setLoadingCari] = useState(false);
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [bookToDelete, setBookToDelete] = useState(null);
   
   const [toast, setToast] = useState(null);
   const [modalConfig, setModalConfig] = useState({ isOpen: false, bukuPilihan: null, inputHal: 300 });
@@ -137,24 +139,36 @@ function Dashboard() {
     }
   };
 
-  // fungsi untuk menghapus buku
-  const handleHapusBuku = async (idBuku) => {
-    const konfirmasi = window.confirm("Yakin ingin menghapus buku ini?");
-    if (!konfirmasi) return;
+  // Membuka modal dan menyimpan ID buku yang akan dihapus
+  const handleHapusBuku = (id) => {
+    setBookToDelete(id);
+    setIsDeleteModalOpen(true);
+  };
 
+  // Mengeksekusi penghapusan
+  const executeHapusBuku = async () => {
+    if (!bookToDelete) return;
     const token = localStorage.getItem('token');
+    
     try {
-      // Tembak endpoint DELETE ke backend berdasarkan ID buku
-      await axios.delete(`http://localhost:3000/books/${idBuku}`, {
+      await axios.delete(`http://localhost:3000/books/${bookToDelete}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
-      // Update State: Buang buku yang ID-nya cocok dengan yang baru saja dihapus
-      setBukuList(bukuList.filter((buku) => buku.id !== idBuku));
-      showToast("Buku dihapus dari koleksi.", "success");
+      setBukuList(bukuList.filter((b) => b.id !== bookToDelete));
+      showToast("Buku berhasil dihapus", "success");
     } catch (error) {
-      console.error("Gagal menghapus buku:", error);
+      showToast("Gagal menghapus buku", "error");
+    } finally {
+      // Tutup modal dan bersihkan state setelah selesai
+      setIsDeleteModalOpen(false);
+      setBookToDelete(null);
     }
+  };
+
+  // Menutup modal jika batal
+  const cancelHapusBuku = () => {
+    setIsDeleteModalOpen(false);
+    setBookToDelete(null);
   };
 
   // fungsi untuk update status buku
@@ -298,6 +312,31 @@ function Dashboard() {
               </button>
               <button className="btn-confirm" onClick={() => eksekusiSimpanBuku(modalConfig.bukuPilihan, modalConfig.inputHal)}>
                 Simpan Buku
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      { /* Modal konfirmasi hapus */ }
+      {isDeleteModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content delete-modal">
+            <div className="delete-modal-header">
+              <div className="warning-icon-bg">
+                <AlertTriangle size={24} color="#ef4444" />
+              </div>
+              <h3>Hapus Buku?</h3>
+            </div>
+            <p className="delete-modal-text">
+              Apakah Anda yakin ingin menghapus buku ini dari koleksi? Tindakan ini tidak dapat dibatalkan dan data ulasan akan hilang.
+            </p>
+            <div className="delete-modal-actions">
+              <button className="btn-cancel" onClick={cancelHapusBuku}>
+                Batal
+              </button>
+              <button className="btn-confirm-delete" onClick={executeHapusBuku}>
+                Ya, Hapus
               </button>
             </div>
           </div>
