@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Trash2, Sun, Moon, LogOut, CheckCircle, BookOpen } from 'lucide-react';
+import { Trash2, Sun, Moon, LogOut, CheckCircle, BookOpen, Star } from 'lucide-react';
 import './Dashboard.css';
 
 function Dashboard() {
@@ -191,6 +191,25 @@ function Dashboard() {
     }
   };
 
+  const handleUpdateReview = async (id, newRating, newReview) => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.put(`http://localhost:3000/books/${id}/review`, 
+        { rating: newRating, review: newReview },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      // Perbarui state lokal agar UI langsung berubah tanpa perlu refresh
+      setBukuList(bukuList.map((item) => 
+        item.id === id ? { ...item, rating: newRating, review: newReview } : item
+      ));
+      
+      showToast("Ulasan berhasil disimpan!", "success");
+    } catch (error) {
+      showToast("Gagal menyimpan ulasan.", "error");
+    }
+  };
+
   // fungsi logout
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -297,7 +316,9 @@ function Dashboard() {
             {isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
             {isDarkMode ? 'Terang' : 'Gelap'}
           </button>
-          <button className="btn-logout" onClick={handleLogout}>Logout</button>
+          <button className="btn-logout" onClick={handleLogout}>
+            <LogOut size={16} /> Logout
+            </button>
         </div>
       </div>
 
@@ -442,6 +463,30 @@ function Dashboard() {
                     </button>
                   )}
                 </div>
+
+                {/* === Fitur Rating dan Ulasan (Hanya muncul jika buku tamat) === */}
+                {buku.status === 'completed' && (
+                  <div className="review-container">
+                    <div className="star-rating">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star 
+                          key={star} 
+                          size={20} 
+                          fill={buku.rating >= star ? "#fbbf24" : "none"}
+                          color={buku.rating >= star ? "#fbbf24" : "var(--border-color)"}
+                          onClick={() => handleUpdateReview(buku.id, star, buku.review)}
+                          className="star-icon"
+                        />
+                      ))}
+                    </div>
+                    <textarea 
+                      className="review-input"
+                      placeholder="Bagaimana pendapat Anda tentang buku ini?..."
+                      defaultValue={buku.review || ''}
+                      onBlur={(e) => handleUpdateReview(buku.id, buku.rating, e.target.value)}
+                    />
+                  </div>
+                )}
               </li>
             );
           })}

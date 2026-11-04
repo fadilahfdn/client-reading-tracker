@@ -46,6 +46,10 @@
   background-color: #ef4444;
   color: white;
   border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   padding: 8px 16px;
   border-radius: 6px;
   cursor: pointer;
@@ -554,6 +558,55 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+
+/* --- FITUR RATING & ULASAN BUKU --- */
+.review-container {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px dashed var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.star-rating {
+  display: flex;
+  gap: 4px;
+}
+
+.star-icon {
+  cursor: pointer;
+  transition: transform 0.2s, filter 0.2s;
+}
+
+.star-icon:hover {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.5));
+}
+
+.review-input {
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 100%;
+  min-height: 65px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  background-color: rgba(130, 130, 130, 0.1);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.85em;
+  color: var(--text-main);
+  resize: vertical;
+  transition: all 0.2s;
+}
+
+.review-input:focus {
+  outline: none;
+  border-color: rgba(59, 130, 246, 0.5);
+  background-color: transparent;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 /* -- Responsivitas Mobile -- */
