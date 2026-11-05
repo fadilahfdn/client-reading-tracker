@@ -26,7 +26,7 @@ function Register() {
     
     try {
       // Mengirim data ke endpoint register backend
-      await axios.post('https://reading-tracker-api-8jpa.onrender.com/auth/register', {
+      await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, {
         email: email,
         username: username,
         password: password
