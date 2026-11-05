@@ -26,7 +26,7 @@ function Register() {
     
     try {
       // Mengirim data ke endpoint register backend
-      await axios.post('http://localhost:3000/auth/register', {
+      await axios.post('https://reading-tracker-api-8jpa.onrender.com/auth/register', {
         email: email,
         username: username,
         password: password

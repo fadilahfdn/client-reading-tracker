@@ -52,7 +52,7 @@ function Dashboard() {
     // Fungsi untuk mengambil data buku pengguna dari backend
     const fetchBuku = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/books', {
+        const response = await axios.get('http:/https://reading-tracker-api-8jpa.onrender.com/books', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -84,7 +84,7 @@ function Dashboard() {
 
     try {
       // Menembak ke backend
-      const response = await axios.get(`http://localhost:3000/books/search?title=${queryPencarian}`, {
+      const response = await axios.get(`https://reading-tracker-api-8jpa.onrender.com/books/search?title=${queryPencarian}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -120,7 +120,7 @@ function Dashboard() {
     };
 
     try {
-      const response = await axios.post('http://localhost:3000/books', dataBukuBaru, {
+      const response = await axios.post('https://reading-tracker-api-8jpa.onrender.com/books', dataBukuBaru, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setBukuList([...bukuList, response.data]); 
@@ -151,7 +151,7 @@ function Dashboard() {
     const token = localStorage.getItem('token');
     
     try {
-      await axios.delete(`http://localhost:3000/books/${bookToDelete}`, {
+      await axios.delete(`https://reading-tracker-api-8jpa.onrender.com/books/${bookToDelete}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setBukuList(bukuList.filter((b) => b.id !== bookToDelete));
@@ -184,7 +184,7 @@ function Dashboard() {
     }
 
     try {
-      const response = await axios.put(`http://localhost:3000/books/${buku.id}/progress`, 
+      const response = await axios.put(`https://reading-tracker-api-8jpa.onrender.com/books/${buku.id}/progress`, 
         { currentPage: pageNumber }, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -208,7 +208,7 @@ function Dashboard() {
   const handleUpdateReview = async (id, newRating, newReview) => {
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.put(`http://localhost:3000/books/${id}/review`, 
+      const response = await axios.put(`https://reading-tracker-api-8jpa.onrender.com/books/${id}/review`, 
         { rating: newRating, review: newReview },
         { headers: { Authorization: `Bearer ${token}` } }
       );
