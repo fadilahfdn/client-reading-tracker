@@ -43,3 +43,24 @@ h1, h2, h3 {
   font-family: 'Plus Jakarta Sans', sans-serif;
   letter-spacing: -0.5px;
 }
+
+/* Menghaluskan Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent; 
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(130, 130, 130, 0.3);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(130, 130, 130, 0.5);
+}
+
+/* Warna saat teks di-block/highlight */
+::selection {
+  background: rgba(59, 130, 246, 0.25);
+  color: inherit;
+}
