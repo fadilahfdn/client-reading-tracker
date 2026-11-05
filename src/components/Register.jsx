@@ -1,5 +1,6 @@
 // src/components/Register.jsx
 import { useState, useEffect } from 'react';
+const API_URL = import.meta.env.VITE_API_URL || "https://reading-tracker-api-8jpa.onrender.com";
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom'; // Menambahkan Link untuk tautan internal
 import './Auth.css';
@@ -26,7 +27,7 @@ function Register() {
     
     try {
       // Mengirim data ke endpoint register backend
-      await axios.post('https://reading-tracker-api-8jpa.onrender.com/auth/register', {
+      await axios.post(`${API_URL}/auth/register`, {
         email: email,
         username: username,
         password: password

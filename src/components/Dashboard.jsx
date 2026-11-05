@@ -1,5 +1,6 @@
 // src/components/Dashboard.jsx
 import { useState, useEffect } from 'react';
+const API_URL = import.meta.env.VITE_API_URL || "https://reading-tracker-api-8jpa.onrender.com";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, Sun, Moon, LogOut, CheckCircle, BookOpen, Star, AlertTriangle } from 'lucide-react';
@@ -52,7 +53,7 @@ function Dashboard() {
     // Fungsi untuk mengambil data buku pengguna dari backend
     const fetchBuku = async () => {
       try {
-        const response = await axios.get('https://reading-tracker-api-8jpa.onrender.com/books', {
+        const response = await axios.get(`${API_URL}/books`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -84,7 +85,7 @@ function Dashboard() {
 
     try {
       // Menembak ke backend
-      const response = await axios.get(`https://reading-tracker-api-8jpa.onrender.com/books/search?title=${queryPencarian}`, {
+      const response = await axios.get(`${API_URL}/books/search?title=${queryPencarian}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -120,7 +121,7 @@ function Dashboard() {
     };
 
     try {
-      const response = await axios.post('https://reading-tracker-api-8jpa.onrender.com/books', dataBukuBaru, {
+      const response = await axios.post(`${API_URL}/books`, dataBukuBaru, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setBukuList([...bukuList, response.data]); 
@@ -151,7 +152,7 @@ function Dashboard() {
     const token = localStorage.getItem('token');
     
     try {
-      await axios.delete('https://reading-tracker-api-8jpa.onrender.com/books/${bookToDelete}', {
+      await axios.delete(`${API_URL}/books/${bookToDelete}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setBukuList(bukuList.filter((b) => b.id !== bookToDelete));
@@ -184,7 +185,7 @@ function Dashboard() {
     }
 
     try {
-      const response = await axios.put(`https://reading-tracker-api-8jpa.onrender.com/books/${buku.id}/progress`, 
+      const response = await axios.put(`${API_URL}/books/${buku.id}/progress`, 
         { currentPage: pageNumber }, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -208,7 +209,7 @@ function Dashboard() {
   const handleUpdateReview = async (id, newRating, newReview) => {
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.put(`https://reading-tracker-api-8jpa.onrender.com/books/${id}/review`, 
+      const response = await axios.put(`${API_URL}/books/${id}/review`, 
         { rating: newRating, review: newReview },
         { headers: { Authorization: `Bearer ${token}` } }
       );

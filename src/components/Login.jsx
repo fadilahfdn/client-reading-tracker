@@ -1,6 +1,7 @@
 // src/components/Login.jsx
 import { useNavigate, Link } from 'react-router-dom';
 import { useState, useEffect } from "react";
+const API_URL = import.meta.env.VITE_API_URL || "https://reading-tracker-api-8jpa.onrender.com";
 import axios from 'axios';
 import './Auth.css';
 
@@ -25,7 +26,7 @@ function Login() {
 
   try {
       // Mengirim request POST ke Backend
-      const response = await axios.post('https://reading-tracker-api-8jpa.onrender.com/auth/login', {
+      const response = await axios.post(`${API_URL}/auth/login`, {
         username: username,
         password: password
       });
