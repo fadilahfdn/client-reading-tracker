@@ -70,6 +70,7 @@
 .auth-input:focus {
   outline: none;
   border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 .btn-auth {
@@ -85,8 +86,19 @@
   transition: background-color 0.2s;
 }
 
-.btn-auth:hover {
+.btn-auth:hover:not(:disabled) {
   background-color: #2563eb;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-auth:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-auth:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .auth-footer {
