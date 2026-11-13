@@ -329,7 +329,8 @@
   animation: popIn 0.3s ease-out;
 }
 
-.modal-box h3 { margin-top: 0; color: var(--text-heading); }
+.modal-title {text-align: center; margin-top: 0;}
+.modal-box h3 { margin-top: 0; color: var(--text-heading);}
 .modal-box p { color: var(--text-muted); font-size: 0.95em; line-height: 1.5; }
 
 .modal-input {

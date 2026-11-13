@@ -18,7 +18,7 @@ function Dashboard() {
   const [bookToDelete, setBookToDelete] = useState(null);
   
   const [toast, setToast] = useState(null);
-  const [modalConfig, setModalConfig] = useState({ isOpen: false, bukuPilihan: null, inputHal: 300 });
+  const [modalConfig, setModalConfig] = useState({ isOpen: false, bukuPilihan: null, inputHal: 300, startHal: 0 });
   const [filterStatus, setFilterStatus] = useState('all'); // Pilihan: 'all', 'unread', 'reading', 'completed'
 
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -101,22 +101,23 @@ function Dashboard() {
   const handleKlikTambah = (bukuPilihan) => {
     let totalHal = bukuPilihan.totalPages || 0;
     
-    if (totalHal === 0) {
-      setModalConfig({ isOpen: true, bukuPilihan: bukuPilihan, inputHal: 300 });
-    } else {
-      // Langsung eksekusi jika halaman sudah ada
-      eksekusiSimpanBuku(bukuPilihan, totalHal);
-    }
+   setModalConfig({ 
+      isOpen: true, 
+      bukuPilihan: bukuPilihan, 
+      inputHal: totalHal > 0 ? totalHal : 300,
+      startHal: 0 
+    });
   };
 
   // Fungsi riil penembak Axios
-  const eksekusiSimpanBuku = async (bukuPilihan, totalHal) => {
+  const eksekusiSimpanBuku = async () => {
+    const { bukuPilihan, inputHal, startHal } = modalConfig;
     const token = localStorage.getItem('token');
     const dataBukuBaru = {
       title: bukuPilihan.title,
       author: bukuPilihan.author, 
-      startPage: 0,
-      endPage: totalHal,
+      startPage: startHal,
+      endPage: inputHal,
       coverUrl: bukuPilihan.coverUrl || null
     };
 
@@ -127,7 +128,7 @@ function Dashboard() {
       setBukuList([...bukuList, response.data]); 
       setHasilPencarian([]);
       setQueryPencarian('');
-      setModalConfig({ isOpen: false, bukuPilihan: null, inputHal: 300 }); // Tutup modal
+      setModalConfig({ isOpen: false, bukuPilihan: null, inputHal: 300, startHal: 0 }); // Tutup modal
       
       // Jika tab saat ini bukan "Semua" atau "Belum Dibaca", pindahkan otomatis
       if (filterStatus !== 'all' && filterStatus !== 'unread') {
@@ -295,23 +296,41 @@ function Dashboard() {
       {modalConfig.isOpen && (
         <div className="modal-overlay">
           <div className="modal-box">
-            <h3>Masukkan Halaman Manual</h3>
-            <p>
-              Data total halaman untuk buku <strong>"{modalConfig.bukuPilihan?.title}"</strong> tidak ditemukan di server publik. 
-              Silakan masukkan perkiraan halamannya:
+            <h3 className="modal-title">Konfirmasi Buku Baru</h3>
+            <p style={{ marginBottom: '20px' }}>
+              Atur detail membaca untuk <strong>"{modalConfig.bukuPilihan?.title}</strong>:
             </p>
-            <input 
-              type="number" 
-              className="modal-input"
-              value={modalConfig.inputHal}
-              min="1"
-              onChange={(e) => setModalConfig({ ...modalConfig, inputHal: parseInt(e.target.value) || 0 })}
-            />
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '0.9em', fontWeight: 'bold' }}>Mulai dari halaman berapa?</label>
+                <input 
+                  type="number" 
+                  className="modal-input"
+                  value={modalConfig.startHal}
+                  min="0"
+                  max={modalConfig.inputHal}
+                  onChange={(e) => setModalConfig({ ...modalConfig, startHal: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                <label style={{ fontSize: '0.9em', fontWeight: 'bold' }}>Total Halaman Buku:</label>
+                <input 
+                  type="number" 
+                  className="modal-input"
+                  value={modalConfig.inputHal}
+                  min="1"
+                  onChange={(e) => setModalConfig({ ...modalConfig, inputHal: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+            </div>
+
             <div className="modal-actions">
-              <button className="btn-cancel" onClick={() => setModalConfig({ isOpen: false, bukuPilihan: null, inputHal: 300 })}>
+              <button className="btn-cancel" onClick={() => setModalConfig({ isOpen: false, bukuPilihan: null, inputHal: 300, startHal: 0 })}>
                 Batal
               </button>
-              <button className="btn-confirm" onClick={() => eksekusiSimpanBuku(modalConfig.bukuPilihan, modalConfig.inputHal)}>
+              <button className="btn-confirm" onClick={eksekusiSimpanBuku}>
                 Simpan Buku
               </button>
             </div>
