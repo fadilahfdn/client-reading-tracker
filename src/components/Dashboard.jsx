@@ -239,6 +239,16 @@ function Dashboard() {
     return statusSistem; // Fallback
   };
 
+  // format tanggal mulai dan selesai baca
+  const formatTanggal = (tanggalIso) => {
+    if (!tanggalIso) return null;
+    return new Date(tanggalIso).toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
   // Kalkulasi statistik
   const totalBukuTersimpan = bukuList.length;
   const totalBukuTamat = bukuList.filter((buku) => buku.status === 'completed').length;
@@ -484,6 +494,12 @@ function Dashboard() {
                         <div>
                           <h4 className="book-title">{buku.title}</h4>
                           <p className="book-author">{buku.author}</p>
+                          {(buku.startedAt || buku.completedAt) && (
+                            <div style={{ fontSize: '0.75em', color: 'var(--text-muted)', marginTop: '6px', lineHeight: '1.4' }}>
+                              {buku.startedAt && <div>Mulai: {formatTanggal(buku.startedAt)}</div>}
+                              {buku.completedAt && <div>Selesai: {formatTanggal(buku.completedAt)}</div>}
+                            </div>
+                          )}
                         </div>
                         <button className="btn-delete" title="Hapus Buku" onClick={() => handleHapusBuku(buku.id)}>
                         <Trash2 size={18} />
