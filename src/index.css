@@ -2,31 +2,35 @@
 
 /* --- VARIABEL GLOBAL TEMA (LIGHT & DARK) --- */
 :root {
-  --bg-body: #f1f5f9;
+  --bg-body: #f7f7f5;
   --bg-card: #ffffff;
-  --bg-section: #f8fafc;
-  --text-main: #334155;
-  --text-heading: #0f172a;
-  --text-muted: #64748b;
-  --border-color: #e2e8f0;
+  --bg-section: #f0f0ed;
+  --text-main: #2e2e32;
+  --text-heading: #111113;
+  --text-muted: #6b6b73;
+  --border-color: #e4e4e0;
   --input-bg: #ffffff;
-  --input-border: #cbd5e1;
-  --shadow-color: rgba(0, 0, 0, 0.05);
+  --input-border: #d4d4cf;
+  --shadow-color: rgba(17, 17, 19, 0.04);
   --glass-bg: rgba(255, 255, 255, 0.85);
+  --accent-primary: #2563eb;
+  --accent-hover: #1d4ed8;
 }
 
 [data-theme="dark"] {
-  --bg-body: #0f172a;
-  --bg-card: #1e293b;
-  --bg-section: #0b1120;
-  --text-main: #cbd5e1;
-  --text-heading: #f8fafc;
-  --text-muted: #94a3b8;
-  --border-color: #334155;
-  --input-bg: #1e293b;
-  --input-border: #475569;
-  --shadow-color: rgba(0, 0, 0, 0.4);
-  --glass-bg: rgba(30, 41, 59, 0.85);
+  --bg-body: #111113;
+  --bg-card: #18181b;
+  --bg-section: #131316;
+  --text-main: #d4d4d8;
+  --text-heading: #fafafa;
+  --text-muted: #8e8e98;
+  --border-color: #27272a;
+  --input-bg: #18181b;
+  --input-border: #3f3f46;
+  --shadow-color: rgba(0, 0, 0, 0.35);
+  --glass-bg: rgba(24, 24, 27, 0.85);
+  --accent-primary: #3b82f6;
+  --accent-hover: #60a5fa;
 }
 
 /* Terapkan ke seluruh halaman aplikasi */
@@ -36,12 +40,15 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3 {
+h1, h2, h3, h4 {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  letter-spacing: -0.5px;
+  color: var(--text-heading);
+  letter-spacing: -0.025em;
 }
 
 /* Menghaluskan Scrollbar */
@@ -61,6 +68,6 @@ h1, h2, h3 {
 
 /* Warna saat teks di-block/highlight */
 ::selection {
-  background: rgba(59, 130, 246, 0.25);
+  background: rgba(37, 99, 235, 0.18);
   color: inherit;
 }
