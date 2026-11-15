@@ -3,7 +3,7 @@
 .dashboard-container {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 0 24px 48px 24px;
   color: var(--text-main);
 }
 
@@ -43,9 +43,9 @@
 .btn-theme:hover { background: var(--border-color); }
 
 .btn-logout {
-  background-color: #ef4444;
-  color: white;
-  border: none;
+  background-color: var(--bg-section);
+  color: #ff4b4b;
+  border: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -57,7 +57,7 @@
   transition: background 0.2s;
 }
 
-.btn-logout:hover { background-color: #dc2626; }
+.btn-logout:hover { background-color: #ffbbbb; }
 
 /* --- SEKSI PENCARIAN --- */
 .search-section {
