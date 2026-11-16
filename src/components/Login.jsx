@@ -1,6 +1,7 @@
 // src/components/Login.jsx
 import { useNavigate, Link } from 'react-router-dom';
 import { useState, useEffect } from "react";
+import { GoogleLogin } from '@react-oauth/google';
 const API_URL = import.meta.env.VITE_API_URL || "https://reading-tracker-api-8jpa.onrender.com";
 import axios from 'axios';
 import './Auth.css';
@@ -11,12 +12,14 @@ function Login() {
   const [pesanError, setPesanError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isDark, setIsDark] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
+      setIsDark(true);
     }
   }, []);
 
@@ -50,6 +53,36 @@ function Login() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setPesanError('');
+    setLoading(true);
+
+    try {
+      // Kirim ID Token dari Google ke Backend untuk diverifikasi
+      const response = await axios.post(`${API_URL}/auth/google`, {
+        credential: credentialResponse.credential
+      });
+
+      // Simpan JWT lokal dari backend agar alur Dashboard tetap identik
+      const tokenJWT = response.data.token;
+      localStorage.setItem('token', tokenJWT);
+
+      navigate('/dashboard');
+    } catch (error) {
+      if (error.response) {
+        setPesanError(error.response.data.message);
+      } else {
+        setPesanError("Gagal masuk menggunakan akun Google.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setPesanError("Login Google dibatalkan atau gagal diproses.");
   };
 
   return (
@@ -123,6 +156,30 @@ function Login() {
             {loading ? 'Memproses...' : 'Login'}
           </button>
         </form>
+
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          margin: '18px 0',
+          color: 'var(--text-muted)',
+          fontSize: '0.85rem'
+        }}>
+          <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color)' }} />
+          <span>atau</span>
+          <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color)' }} />
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            theme={isDark ? "filled_black" : "outline"}
+            size="large"
+            width="320"
+            text="continue_with"
+          />
+        </div>
         
         <div className="auth-footer">
           Belum punya akun? <Link to="/register" className="auth-link">Daftar di sini.</Link>
