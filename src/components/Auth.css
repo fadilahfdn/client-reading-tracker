@@ -5,127 +5,159 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: 20px;
-  /* Latar belakang dinamis mengikuti tema */
-  background: linear-gradient(135deg, var(--bg-body) 0%, var(--border-color) 100%);
+  padding: 24px;
+  box-sizing: border-box;
+  background-color: var(--bg-body);
 }
 
 .auth-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
-  padding: 40px;
-  border-radius: 16px;
+  padding: 36px 32px;
+  border-radius: 14px;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 10px 25px var(--shadow-color);
-  animation: fadeUp 0.5s ease-out forwards;
+  box-sizing: border-box;
+  box-shadow: 0 4px 20px -4px var(--shadow-color);
+  animation: authFadeUp 0.35s ease-out forwards;
+}
+
+@keyframes authFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .auth-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 24px;
 }
 
 .auth-header h2 {
-  margin: 0 0 10px 0;
+  margin: 0 0 6px 0;
   color: var(--text-heading);
-  font-size: 1.8em;
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
 }
 
 .auth-header p {
   margin: 0;
+  font-size: 0.925rem;
   color: var(--text-muted);
 }
 
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 16px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .form-group label {
-  font-size: 0.9em;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-heading);
 }
 
 .auth-input {
-  padding: 12px 15px;
+  padding: 10px 14px;
   background: var(--input-bg);
-  color: var(--text-main);
+  color: var(--text-heading);
   border: 1px solid var(--input-border);
   border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 0.2s;
+  font-family: inherit;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.75;
 }
 
 .auth-input:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  border-color: var(--accent-primary, #2563eb);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
 .btn-auth {
-  background-color: #3b82f6;
-  color: white;
+  background-color: var(--accent-primary, #2563eb);
+  color: #ffffff;
   border: none;
-  padding: 12px;
+  padding: 11px 16px;
   border-radius: 8px;
-  font-size: 16px;
-  font-weight: bold;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  margin-top: 10px;
-  transition: background-color 0.2s;
+  margin-top: 6px;
+  transition: background-color 0.2s ease, transform 0.15s ease;
 }
 
 .btn-auth:hover:not(:disabled) {
-  background-color: #2563eb;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  background-color: var(--accent-hover, #1d4ed8);
 }
 
 .btn-auth:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: scale(0.99);
 }
 
 .btn-auth:disabled {
-  background-color: #9ca3af;
+  opacity: 0.6;
   cursor: not-allowed;
-  opacity: 0.7;
 }
 
 .auth-footer {
   text-align: center;
-  margin-top: 20px;
-  font-size: 0.9em;
+  margin-top: 22px;
+  font-size: 0.875rem;
   color: var(--text-muted);
 }
 
 .auth-link {
-  color: #3b82f6;
+  color: var(--accent-primary, #2563eb);
   text-decoration: none;
-  font-weight: bold;
+  font-weight: 600;
 }
 
 .auth-link:hover {
   text-decoration: underline;
 }
 
-/* Reusable Error Message */
+/* Pesan Error & Status */
 .auth-error {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-  padding: 10px;
-  border: 1px solid #ef4444;
+  background-color: rgba(239, 68, 68, 0.08);
+  color: #dc2626;
+  padding: 10px 14px;
+  border: 1px solid rgba(239, 68, 68, 0.28);
   border-radius: 8px;
-  font-size: 0.9em;
+  font-size: 0.875rem;
+  line-height: 1.4;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
+}
+
+[data-theme="dark"] .auth-error {
+  background-color: rgba(239, 68, 68, 0.14);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 28px 20px;
+  }
 }
