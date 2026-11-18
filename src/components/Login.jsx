@@ -109,7 +109,16 @@ function Login() {
             />
           </div>
           <div className="form-group">
-            <label>Password</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label>Password</label>
+              <Link
+                to="/forgot-password"
+                className="auth-link"
+                style={{ fontSize: '0.82rem', fontWeight: 500 }}
+              >
+                Lupa password?
+              </Link>
+            </div>
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <input
                 type={showPassword ? "text" : "password"}
